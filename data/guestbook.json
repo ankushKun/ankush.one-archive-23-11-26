@@ -1,6 +1,6 @@
 {
- "updated": "2026-11-07T10:03:59.366Z",
- "count": 21,
+ "updated": "2026-11-09T11:28:18.229Z",
+ "count": 22,
  "entries": [
   {
    "id": "8rz540vzu",
@@ -232,6 +232,17 @@
    "variant": 1,
    "ts": 1794013355743,
    "updatedTs": 1794013355743
+  },
+  {
+   "id": "8qspb9muc",
+   "name": "Dr RayMorgan",
+   "from": "Milan, Italy",
+   "blurb": "Scientist and writer",
+   "x": "",
+   "ig": "",
+   "variant": 4,
+   "ts": 1794218006862,
+   "updatedTs": 1794218231496
   }
  ]
 }
