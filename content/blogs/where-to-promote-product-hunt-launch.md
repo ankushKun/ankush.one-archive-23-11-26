@@ -151,6 +151,8 @@ Link in the reply, and I'd love your feedback 👇
 
 **When:** 12:01 AM Pacific, then a second post around 7 AM Pacific for the US morning with something new, like a reply you got or a feature someone asked for.
 
+Deciding between Product Hunt and X for launch day? This [Product Hunt vs X launch playbook](https://www.flowjam.com/blog/product-hunt-vs-x-launch) covers which to pick and how to run both.
+
 ## 4. LinkedIn: where B2B buyers will see it {#linkedin}
 
 **Best for:** B2B products, and your former colleagues, who are some of the most willing supporters you have.
