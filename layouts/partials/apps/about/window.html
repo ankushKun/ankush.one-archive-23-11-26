@@ -1,86 +1,176 @@
-{{/* The About window: the site's front page. One column that reads top to
-bottom in half a minute: who, what now, where I have worked, a few facts, the
-strongest work, what is new, how to reach me. The essay from
-content/about/_index.md is folded underneath as "the longer story".
+{{/* The About window: the site's front page, and what every visit opens on.
+Design: https://claude.ai/artifact/TWuNUTZ9TLPfeW8XacZFx2
+
+Top to bottom: who (name, one line, email, call, every social), where to go
+(Projects, Blog, Timeline, Resume), what now (the Construct card and four
+numbers), the strongest work, experience, what is new, then the essay from
+content/about/_index.md folded underneath as "the longer story".
 
 Opens on every visit (mavericks.js openBootAbout) and is also /about/.
 Usage: {{ partial "apps/about/window.html" (dict "id" "about" "title" "About Ankush") }}
   "standalone" true   on /about/: links navigate instead of opening windows
   "storyOpen" true    the longer story starts open
 Styles: assets/css/apps/home.css. Data: hugo.toml [params.profile],
-content/about/_index.md front matter, data/contact.yaml, data/wins.yaml. */}}
+content/about/_index.md front matter (tagline, now, cta, stats, work),
+data/contact.yaml, data/resume.yaml (experience years), data/apps.yaml (icons). */}}
 {{- $about := site.GetPage "/about" -}}
 {{- $profile := site.Params.profile -}}
 {{- $contact := hugo.Data.contact -}}
 {{- $standalone := .standalone | default false -}}
-{{- $projects := where site.RegularPages "Section" "projects" -}}
-{{- $latest := first 5 ((where site.RegularPages "Section" "in" (slice "blogs" "projects" "timeline")).ByDate.Reverse) -}}
+{{- $latest := first 3 ((where site.RegularPages "Section" "in" (slice "blogs" "projects" "timeline")).ByDate.Reverse) -}}
+{{- /* Start and end years per org, from the resume */ -}}
+{{- $years := dict -}}
+{{- range hugo.Data.resume.experience -}}
+{{- $from := substr .start 0 4 -}}
+{{- $to := "now" -}}{{- with .end }}{{ $to = substr . 0 4 }}{{ end -}}
+{{- $span := cond (eq $from $to) $from (printf "%s to %s" $from $to) -}}
+{{- $years = merge $years (dict .org $span) -}}
+{{- end -}}
+{{- /* Window id and link attributes for a page, as the project grid uses */ -}}
+{{- $prefixes := dict "blogs" "post" "projects" "project" "timeline" "timeline" -}}
 <div id="content-{{ .id }}">
     <div class="home">
         <header class="home-head">
-            <img class="home-avatar" src="{{ $contact.profile.avatar | default "/pfp-128.webp" }}" alt="" width="72" height="72"
-                loading="lazy" decoding="async">
+            <img class="home-avatar" src="{{ $contact.profile.avatar | default "/pfp-128.webp" }}" alt="{{ $profile.name }}" width="104" height="104"
+                decoding="async">
             <div class="home-id">
                 {{/* The page heading on both pages that render this: home and /about/ */}}
                 <h1 class="home-name">{{ $profile.name | default site.Params.author.name }}</h1>
-                <p class="home-tagline">{{ with $about }}{{ .Params.tagline | default $profile.description }}{{ else }}{{ $profile.description }}{{ end }}</p>
+                <p class="home-tagline">{{ with $about }}{{ .Params.tagline | default $profile.description | markdownify }}{{ else }}{{ $profile.description }}{{ end }}</p>
+                <div class="home-actions">
+                    {{ with $contact.profile.email }}
+                    <a class="mac-btn primary home-btn" href="mailto:{{ . }}" title="{{ . }}">
+                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                        Email me
+                    </a>
+                    {{ end }}
+                    {{ with $contact.profile.schedule }}
+                    <a class="mac-btn home-btn" href="/schedule/">
+                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        Book a call
+                    </a>
+                    {{ end }}
+                    <ul class="home-glyphs">
+                        {{ range $contact.socials }}
+                        <li><a class="home-glyph" href="{{ .url }}" target="_blank" rel="noopener me" aria-label="{{ .platform }}: {{ .handle }}" title="{{ .platform }} · {{ .handle }}"><img class="home-glyph-icon" src="{{ .icon }}" alt="" width="16" height="16"></a></li>
+                        {{ end }}
+                    </ul>
+                </div>
             </div>
         </header>
 
+        {{- /* The four places people come for. Plain links: inside the desktop
+        mavericks.js opens them as windows, on /about/ they navigate. */}}
+        <nav class="home-nav" aria-label="Sections">
+            {{ range slice (dict "id" "projects" "label" "Projects" "url" "/projects/") (dict "id" "blogs" "label" "Blog" "url" "/blogs/") (dict "id" "timeline" "label" "Timeline" "url" "/timeline/") (dict "id" "resume" "label" "Resume" "url" "/resume/") }}
+            {{ $app := index (where hugo.Data.apps.apps "id" .id) 0 }}
+            <a class="home-tile" href="{{ .url }}">
+                {{ with $app }}{{ partial "os/app-icon.html" (dict "app" . "context" "grid") }}{{ end }}
+                <span class="home-tile-label">{{ .label }}</span>
+            </a>
+            {{ end }}
+        </nav>
+
         {{ with $about }}{{ with .Params.now }}
-        <section class="home-section" aria-labelledby="home-now-{{ $.id }}">
-            <h2 class="home-label" id="home-now-{{ $.id }}">Now</h2>
-            <div class="home-text">{{ . | markdownify }}</div>
-            {{- /* The call to action, from `cta` in content/about/_index.md. The
-            same pill and mascot as the CTAs on Construct's own blog. Construct
-            refuses framing, so the link always opens in a real tab. */}}
-            {{ with $about.Params.cta }}
-            <p class="home-cta">
-                <a class="home-cta-link" href="{{ .url }}" data-open="tab" target="_blank" rel="noopener">
+        <section class="home-now" aria-labelledby="home-now-{{ $.id }}">
+            <div class="home-card home-construct">
+                <h2 class="home-label home-construct-title" id="home-now-{{ $.id }}">
                     <picture>
                         <source srcset="/media/construct/mascot-eyes-static.webp" media="(prefers-reduced-motion: reduce)">
                         <img src="/media/construct/mascot-eyes.webp" alt="" width="34" height="36" decoding="async">
                     </picture>
-                    {{ .text }}
-                    <span aria-hidden="true">&rarr;</span>
-                </a>
-            </p>
+                    {{ .title }}
+                </h2>
+                <p class="home-construct-text">{{ .text | markdownify }}</p>
+                <div class="home-construct-foot">
+                    {{- /* The same mascot pill as the CTAs on Construct's own blog.
+                    Construct refuses framing, so the link always opens in a tab. */}}
+                    {{ with $about.Params.cta }}
+                    <a class="home-cta-link" href="{{ .url }}" data-open="tab" target="_blank" rel="noopener">{{ .text }} <span aria-hidden="true">&rarr;</span></a>
+                    {{ end }}
+                    {{ with .badge }}
+                    <a class="home-construct-badge" href="{{ .url }}" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>
+                        {{ .text }}
+                    </a>
+                    {{ end }}
+                </div>
+            </div>
+            {{ with $about.Params.stats }}
+            <dl class="home-stats">
+                {{ range . }}
+                <div class="home-card home-stat">
+                    <dt>{{ .label }}</dt>
+                    <dd>{{ .value }}</dd>
+                </div>
+                {{ end }}
+            </dl>
             {{ end }}
+        </section>
+        {{ end }}{{ end }}
+
+        {{ with $about }}{{ with .Params.work }}
+        <section class="home-section" aria-labelledby="home-work-{{ $.id }}">
+            <div class="home-section-head">
+                <h2 class="home-label" id="home-work-{{ $.id }}">Selected work</h2>
+                <a class="home-more" href="/projects/">All projects <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            <ul class="home-work">
+                {{ range . }}{{ $blurb := .blurb }}{{ with site.GetPage .page }}
+                <li>
+                    <a class="home-work-card" href="{{ .RelPermalink }}"
+                        {{- if not $standalone }} data-window="project-{{ .File.UniqueID }}" data-title="{{ .Title }}" data-permalink="{{ .Permalink }}"{{ end }}>
+                        {{ with partial "apps/thumb.html" (dict "src" (.Params.image | default .Params.og_image) "spec" "480x252") }}
+                        <img class="home-work-img" src="{{ .RelPermalink }}" alt="" width="240" height="126" loading="lazy" decoding="async">
+                        {{ end }}
+                        <span class="home-work-title">{{ index (split .LinkTitle ":") 0 }}</span>
+                        <span class="home-work-text">{{ $blurb | default .Params.summary }}</span>
+                    </a>
+                </li>
+                {{ end }}{{ end }}
+            </ul>
         </section>
         {{ end }}{{ end }}
 
         {{ with $profile.experience }}
         <section class="home-section" aria-labelledby="home-roles-{{ $.id }}">
-            <h2 class="home-label" id="home-roles-{{ $.id }}">Experience</h2>
-            <ul class="home-roles">
+            <div class="home-section-head">
+                <h2 class="home-label" id="home-roles-{{ $.id }}">Experience</h2>
+                <a class="home-more" href="/resume/">Resume <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            <ol class="home-roles">
                 {{ range . }}
-                <li class="home-role">
+                <li class="home-role{{ if .current }} is-current{{ end }}">
+                    {{ with index $years .org }}<span class="home-role-years">{{ . }}</span>{{ end }}
                     <span class="home-role-title">{{ .role }}</span>
                     <a class="home-role-org" href="{{ .url }}" target="_blank" rel="noopener">{{ .org }}</a>
-                    {{ if .current }}<span class="home-role-now">now</span>{{ end }}
                 </li>
                 {{ end }}
-            </ul>
+            </ol>
         </section>
         {{ end }}
 
         {{ with $latest }}
         <section class="home-section home-latest" aria-labelledby="home-latest-{{ $.id }}">
-            <h2 class="home-label" id="home-latest-{{ $.id }}"><span class="widget-icon blink-new" aria-hidden="true">NEW</span> Latest</h2>
+            <div class="home-section-head">
+                <h2 class="home-label" id="home-latest-{{ $.id }}"><span class="widget-icon blink-new" aria-hidden="true">NEW</span> Latest</h2>
+                <a class="home-more" href="/blogs/">All posts <span aria-hidden="true">&rarr;</span></a>
+            </div>
             <div class="home-rows">
                 {{ range . }}
-                {{ $prefix := "post" }}{{ $label := "blog" }}
-                {{ if eq .Section "projects" }}{{ $prefix = "project" }}{{ $label = "project" }}{{ end }}
-                {{ if eq .Section "timeline" }}{{ $prefix = "timeline" }}{{ $label = "timeline" }}{{ end }}
+                {{ $prefix := index $prefixes .Section }}
                 {{/* .widget-blog-item: retention.js marks what is new since this
                 visitor's last visit, as it did on the old desktop widget */}}
                 <a href="{{ .RelPermalink }}" class="home-row widget-blog-item"
                     {{- if not $standalone }} data-window="{{ $prefix }}-{{ .File.UniqueID }}" data-title="{{ .Title }}"
                     data-permalink="{{ .Permalink }}"{{ end }}>
-                    <span class="home-row-main">
-                        <span class="home-row-title widget-blog-title">{{ .Title }}</span>
-                        <span class="home-row-text"><span class="home-kind home-kind-{{ .Section }}">{{ $label }}</span>{{ with .Params.summary | default .Summary }} {{ . | plainify | htmlUnescape | truncate 90 }}{{ end }}</span>
-                    </span>
+                    {{ with partial "apps/thumb.html" (dict "src" (.Params.image | default .Params.og_image) "spec" "192x108") }}
+                    <img class="home-row-img" src="{{ .RelPermalink }}" alt="" width="96" height="54" loading="lazy" decoding="async">
+                    {{ else }}
+                    {{ $app := index (where hugo.Data.apps.apps "id" .Section) 0 }}
+                    <span class="home-row-img home-row-icon">{{ with $app }}{{ partial "os/app-icon.html" (dict "app" . "context" "spotlight") }}{{ end }}</span>
+                    {{ end }}
+                    <span class="home-row-title widget-blog-title">{{ .Title }}</span>
                     {{- /* "Jul 31" this year, "Jan 18, 2025" for older entries, "2019" when only the year is known */}}
                     {{ $dateText := .Date.Format "Jan 2" }}
                     {{ if eq .Params.date_precision "year" }}{{ $dateText = .Date.Format "2006" }}
@@ -91,31 +181,6 @@ content/about/_index.md front matter, data/contact.yaml, data/wins.yaml. */}}
             </div>
         </section>
         {{ end }}
-
-        {{ with $about }}{{ with .Params.facts }}
-        <section class="home-section" aria-labelledby="home-facts-{{ $.id }}">
-            <h2 class="home-label" id="home-facts-{{ $.id }}">Quick facts</h2>
-            <ul class="home-facts">
-                {{ range . }}<li>{{ . | markdownify }}</li>{{ end }}
-            </ul>
-        </section>
-        {{ end }}{{ end }}
-
-        <section class="home-section home-reach" aria-labelledby="home-contact-{{ $.id }}">
-            <h2 class="home-label" id="home-contact-{{ $.id }}">Contact</h2>
-            {{/* One quiet line for email and the call link, then a row of small
-            glyphs. A glyph shows its handle when hovered or focused; every
-            one carries the platform and handle for screen readers. */}}
-            <p class="home-reach-line">
-                {{ with $contact.profile.email }}<a class="home-reach-mail" href="mailto:{{ . }}">{{ . }}</a>{{ end }}
-                {{ with $contact.profile.schedule }}<span class="home-reach-sep" aria-hidden="true">·</span><a class="home-reach-call" href="/schedule/">Book a call</a>{{ end }}
-            </p>
-            <ul class="home-glyphs">
-                {{ range $contact.socials }}
-                <li><a class="home-glyph" href="{{ .url }}" target="_blank" rel="noopener" aria-label="{{ .platform }}: {{ .handle }}" title="{{ .platform }} · {{ .handle }}"><img class="home-glyph-icon" src="{{ .icon }}" alt="" width="16" height="16" loading="lazy"><span class="home-glyph-handle">{{ .handle }}</span></a></li>
-                {{ end }}
-            </ul>
-        </section>
 
         {{ with $about }}{{ with .Content }}
         <details class="home-fold home-story"{{ if $.storyOpen }} open{{ end }}>
@@ -128,11 +193,8 @@ content/about/_index.md front matter, data/contact.yaml, data/wins.yaml. */}}
 
         {{ if not $standalone }}
         <footer class="home-foot">
-            <span class="home-foot-hint">It works like a Mac from 2013. Click things.</span>
-            <span class="home-foot-links">
-                <a href="/?open=guestbook">Sign the guestbook</a>
-                <a href="/?open=launchpad">All apps</a>
-            </span>
+            <a href="/?open=guestbook">Sign the guestbook</a>
+            <a href="/?open=launchpad">All apps</a>
         </footer>
         {{ end }}
     </div>

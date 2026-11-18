@@ -2,13 +2,33 @@
 title = "About Ankush Singh"
 # The Contacts page was folded into About (same links, plus Book Meeting)
 aliases = ["/contact/"]
-description = "About Ankush Singh, Co-founder of Construct Computer. Previously Entrepreneur in Residence at Forward Research, Developer Relations Engineer at Arweave India and Software Engineer Intern at Physics Wallah."
+description = "Ankush Singh is the co-founder of Construct Computer, AI employees that each get their own cloud computer. Previously Entrepreneur in Residence at Forward Research, Developer Relations Engineer at Arweave India and Software Engineer Intern at Physics Wallah. Builds AI agents, developer tools and Nintendo 3DS homebrew."
 
 # The front page (layouts/partials/apps/about/window.html, the About window
 # and /about/) is built from these; the body below is "the longer story".
-tagline = "Co-founder of Construct Computer. I build AI agents and developer tools, and I ship a lot."
-now = "Building [Construct Computer](https://construct.computer/?utm_source=ankush.one&utm_medium=referral&utm_campaign=about_now): a workforce of AI employees that each get their own cloud computer, so they can actually finish work instead of just talking about it. Browser, terminal, files, memory, the whole desk, not another chat window."
-cta = { text = "See what Construct can do", url = "https://construct.computer/?utm_source=ankush.one&utm_medium=referral&utm_campaign=about_cta" }
+# The tagline is the first sentence answer engines quote: keep the name of
+# the company and what I build in it.
+tagline = "Co-founder of Construct Computer. I build AI agents, developer tools and Nintendo 3DS homebrew, and I ship a lot."
+# The Construct card
+now = { title = "Now building Construct Computer", text = "AI employees that each get their own cloud computer, with a browser, terminal, files and memory, so they finish the work instead of talking about it.", badge = { text = "#1 Product of the Day on Product Hunt", url = "https://www.producthunt.com/products/construct-computer" } }
+cta = { text = "See what it can do", url = "https://construct.computer/?utm_source=ankush.one&utm_medium=referral&utm_campaign=about_cta" }
+# The four numbers beside the Construct card. Each one is backed by the
+# longer story below or data/wins.yaml.
+stats = [
+  { value = "50+", label = "hackathons since 2017" },
+  { value = "12+", label = "prizes won" },
+  { value = "100+", label = "developers mentored" },
+  { value = "1", label = "startup acquired" },
+]
+# Selected work: three project pages with a cover image, and a line for each
+# that fits under the card (the project's summary is used when blurb is empty).
+work = [
+  { page = "/projects/2026.3dsdl", blurb = "Downloads files to the 3DS SD card from a URL or a QR code, over real HTTPS." },
+  { page = "/projects/2026.sh23ds", blurb = "Silent Hill 2 rebuilt in C to run natively on the Nintendo 3DS." },
+  { page = "/projects/2023.betteridea", blurb = "A web IDE and package manager for AO, acquired by Forward Research." },
+]
+# Not shown in the window any more (the numbers and the story cover them);
+# kept for the markdown twin at /about/index.md, where answer engines read it.
 # Latest first; the YouTube line is ongoing, so it closes.
 facts = [
   "Construct launched as #1 Product of the Day on Product Hunt in August 2026.",
