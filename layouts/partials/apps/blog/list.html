@@ -64,7 +64,7 @@ Usage:
                         <div class="blog-summary">{{ .Summary | plainify | htmlUnescape | truncate 120 }}</div>
                     </div>
                     {{/* Cover thumbnail, on the right so titles stay aligned for posts without one */}}
-                    {{ with partial "apps/thumb.html" (dict "src" .Params.og_image "spec" "152x80") }}
+                    {{ with partial "apps/thumb.html" (dict "src" (.Params.image | default .Params.og_image) "spec" "152x80") }}
                     <img class="blog-row-thumb" src="{{ .RelPermalink }}" alt="" width="76" height="40" loading="lazy" decoding="async">
                     {{ end }}
                 </a>

@@ -70,7 +70,7 @@ them for embeds of the authors' own pages, or remove them, on request.
 | `static/icons/medium.svg` | Medium logomark | Medium | Path from Simple Icons (simpleicons.org, CC0 1.0); the mark itself is Medium's trademark, used to link to the owner's Medium profile |
 | `static/emojis/harold.jpg` | Reaction image used in one blog post | **unconfirmed** | Source **unconfirmed** |
 | `static/media/*-og.jpg` | Blog and project cover images | Site owner | Owner to confirm |
-| `static/media/construct/*.jpg`, `static/media/construct/<post>/*` | Social cards and figures of the posts cross-posted from construct.computer | Construct Computer (the site owner's company) | Republished with the posts; each post's `canonical` points at the original |
+| `static/media/construct/*.jpg`, `static/media/construct/<post>/*` | Social cards, figures and the mascot in the About window, from the posts cross-posted from construct.computer | Construct Computer (the site owner's company) | Republished with the posts; each post's `canonical` points at the original |
 | `layouts/partials/apps/doc/glyph.html` (github, npm, x) | Small brand marks in the article links bar | GitHub, npm and X | Trademarks of their owners, used only to label links to those services |
 | `static/media/projects/*-cover.jpg` (12 files) | Project share images: thumbnails of the project demo videos on the site owner's own YouTube channel (`@AnkushKun`) | Site owner | Owner's own videos |
 
